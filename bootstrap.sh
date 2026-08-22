@@ -18,9 +18,8 @@ if [ -d .i18n ]; then
 fi
 
 # Canonical business brand is TopTent Pro. The migrated Wix source used the
-# older Tenttop/TENTTOP label in UI copy and metadata, so normalise every
-# generated customer-facing source file at build time without touching product
-# specification data or URLs.
+# older Tenttop/TENTTOP label in customer-facing copy and metadata. Word-boundary
+# matching deliberately avoids identifiers such as NEXT_PUBLIC_TENTTOP_WHATSAPP.
 node <<'NODE'
 const fs = require('fs');
 const path = require('path');
@@ -33,8 +32,8 @@ function rewriteFile(file) {
   if (!textExtensions.has(ext)) return;
   const source = fs.readFileSync(file, 'utf8');
   const updated = source
-    .replaceAll('TENTTOP', 'TOPTENT PRO')
-    .replaceAll('Tenttop', 'TopTent Pro');
+    .replace(/\bTENTTOP\b/g, 'TOPTENT PRO')
+    .replace(/\bTenttop\b/g, 'TopTent Pro');
   if (updated !== source) fs.writeFileSync(file, updated);
 }
 
