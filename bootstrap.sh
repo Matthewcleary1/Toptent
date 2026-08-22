@@ -17,9 +17,10 @@ if [ -d .i18n ]; then
   tar -xJf /tmp/tenttop-i18n-remainder.tar.xz -C .
 fi
 
-# Canonical business brand is TopTent Pro. The migrated Wix source used the
-# older Tenttop/TENTTOP label in customer-facing copy and metadata. Word-boundary
-# matching deliberately avoids identifiers such as NEXT_PUBLIC_TENTTOP_WHATSAPP.
+# Canonical business/product brand is TopTent Pro. The migrated Wix source used
+# Tenttop/TENTTOP for the company and TopTent for some product labels. Normalise
+# customer-facing source at build time without altering specs, prices, URLs or
+# environment identifiers such as NEXT_PUBLIC_TENTTOP_WHATSAPP.
 node <<'NODE'
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +34,8 @@ function rewriteFile(file) {
   const source = fs.readFileSync(file, 'utf8');
   const updated = source
     .replace(/\bTENTTOP\b/g, 'TOPTENT PRO')
-    .replace(/\bTenttop\b/g, 'TopTent Pro');
+    .replace(/\bTenttop\b/g, 'TopTent Pro')
+    .replace(/\bTopTent\b(?! Pro)/g, 'TopTent Pro');
   if (updated !== source) fs.writeFileSync(file, updated);
 }
 
