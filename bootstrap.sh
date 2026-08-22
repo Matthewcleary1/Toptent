@@ -52,6 +52,38 @@ function walk(target) {
 for (const root of roots) walk(root);
 NODE
 
+# iOS Safari gives date controls an intrinsic inline width that can ignore a
+# responsive grid child's available width. Force all form controls, and date
+# inputs in particular, to size inside the form card on narrow screens.
+cat >> app/globals.css <<'CSS'
+
+/* Mobile form sizing: includes iOS Safari input[type=date] intrinsic width fix. */
+.form-card,
+.form-card label {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.form-card .input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.form-card input[type="date"].input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+CSS
+
 # The Supabase Edge Function targets Deno and is deployed separately by Supabase.
 # Keep it outside Next.js/Node TypeScript checking during the Vercel build.
 node <<'NODE'
