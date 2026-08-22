@@ -3,6 +3,9 @@ set -euo pipefail
 cat .bootstrap/source.part1 .bootstrap/source.part2 .bootstrap/source.part3 .bootstrap/source.part4 | base64 --decode > /tmp/tenttop-source.tar.xz
 tar -xJf /tmp/tenttop-source.tar.xz -C .
 
+cat .bootstrap/overrides.part1 .bootstrap/overrides.part2 .bootstrap/overrides.part3 .bootstrap/overrides.part4 | base64 --decode > /tmp/tenttop-overrides.tar.xz
+tar -xJf /tmp/tenttop-overrides.tar.xz -C .
+
 # The Supabase Edge Function targets Deno and is deployed separately by Supabase.
 # Keep it outside Next.js/Node TypeScript checking during the Vercel build.
 node <<'NODE'
