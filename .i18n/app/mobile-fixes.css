@@ -36,6 +36,11 @@ input[type="file"].input {
 }
 
 @media (max-width: 767px) {
+  /* 16px prevents iOS Safari from zooming the page when a field is focused. */
+  .form-card .input {
+    font-size: 16px;
+  }
+
   /* Keep anchor jumps clear of the sticky navigation. */
   #reserve {
     scroll-margin-top: 5.75rem;
