@@ -10,7 +10,9 @@ export function isLocale(value: string): value is Locale {
 export function pathForLocale(path: string, locale: Locale): string {
   if (!path || path === "/") return locale === "es" ? "/es" : "/";
   if (/^(https?:|mailto:|tel:|#)/.test(path)) return path;
-  const [pathname, suffix = ""] = path.split(/(?=[?#])/s, 2);
+  const splitIndex = path.search(/[?#]/);
+  const pathname = splitIndex === -1 ? path : path.slice(0, splitIndex);
+  const suffix = splitIndex === -1 ? "" : path.slice(splitIndex);
   const clean = pathname.startsWith("/es/") ? pathname.slice(3) : pathname === "/es" ? "/" : pathname;
   const localized = locale === "es" ? `/es${clean === "/" ? "" : clean}` : clean;
   return `${localized}${suffix}`;
