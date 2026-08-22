@@ -1,0 +1,55 @@
+/* Mobile/browser hardening layered on top of the generated Tailwind stylesheet. */
+
+/* iOS Safari gives date/file controls an intrinsic width that can exceed a
+   grid/form column unless min-inline-size is explicitly reset. */
+.form-card,
+.form-card > *,
+.form-card label,
+.form-card .grid,
+.input {
+  min-width: 0;
+  min-inline-size: 0;
+  max-width: 100%;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="date"].input,
+input[type="datetime-local"].input,
+input[type="time"].input,
+input[type="month"].input,
+input[type="week"].input,
+input[type="file"].input,
+textarea.input,
+select.input {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+input[type="file"].input {
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  /* Keep anchor jumps clear of the sticky navigation. */
+  #reserve {
+    scroll-margin-top: 5.75rem;
+  }
+
+  /* Once someone has jumped into or started using the reservation form,
+     the persistent product CTA should not cover the form controls. */
+  #reserve:target ~ .fixed.inset-x-0.bottom-0.z-40,
+  #reserve:focus-within ~ .fixed.inset-x-0.bottom-0.z-40 {
+    display: none;
+  }
+
+  /* Respect the iPhone home-indicator safe area when the CTA is visible. */
+  .fixed.inset-x-0.bottom-0.z-40 {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
