@@ -17,10 +17,8 @@ if [ -d .i18n ]; then
   tar -xJf /tmp/tenttop-i18n-remainder.tar.xz -C .
 fi
 
-# Canonical business/product brand is TopTent Pro. The migrated Wix source used
-# Tenttop/TENTTOP for the company and TopTent for some product labels. Normalise
-# customer-facing source at build time without altering specs, prices, URLs or
-# environment identifiers such as NEXT_PUBLIC_TENTTOP_WHATSAPP.
+# Canonical business/product brand is TopTent Pro. Normalise customer-facing
+# source at build time without altering URLs or environment identifiers.
 node <<'NODE'
 const fs = require('fs');
 const path = require('path');
@@ -52,15 +50,16 @@ function walk(target) {
 for (const root of roots) walk(root);
 NODE
 
-# iOS Safari gives date controls an intrinsic inline width that can ignore a
-# responsive grid child's available width. Force all form controls, and date
-# inputs in particular, to size inside the form card on narrow screens.
+# Keep form grid children shrinkable on small screens.
 cat >> app/globals.css <<'CSS'
 
-/* Mobile form sizing: includes iOS Safari input[type=date] intrinsic width fix. */
 .form-card,
-.form-card label {
+.form-card > *,
+.form-card label,
+.form-card .grid,
+.input {
   min-width: 0;
+  min-inline-size: 0;
   max-width: 100%;
 }
 
@@ -72,15 +71,39 @@ cat >> app/globals.css <<'CSS'
   box-sizing: border-box;
 }
 
-.form-card input[type="date"].input {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  inline-size: 100% !important;
-  max-inline-size: 100% !important;
-  min-inline-size: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden;
+/*
+ * iOS 26 WebKit bug 301648: date/time controls with horizontal padding can
+ * render wider than width:100%. On touch WebKit, remove horizontal padding
+ * from date fields and use text-indent instead so the native control stays
+ * inside the form card while retaining the same visual inset.
+ */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    .form-card label:has(> input[type="date"].input) {
+      overflow: hidden;
+    }
+
+    .form-card input[type="date"].input {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100% !important;
+      inline-size: 100% !important;
+      min-width: 0 !important;
+      min-inline-size: 0 !important;
+      max-width: 100% !important;
+      max-inline-size: 100% !important;
+      height: 48px;
+      min-height: 48px;
+      padding: 0 !important;
+      text-indent: .9rem;
+      box-sizing: border-box !important;
+      overflow: hidden;
+    }
+
+    .form-card input[type="date"].input::-webkit-calendar-picker-indicator {
+      margin-right: .9rem;
+    }
+  }
 }
 CSS
 
