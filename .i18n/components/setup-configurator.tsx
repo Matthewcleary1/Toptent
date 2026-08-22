@@ -37,14 +37,22 @@ export function SetupConfigurator({ mode, locale }: { mode: "build" | "rental"; 
   const buildTotal = buildBase.priceEur + pricedPurchaseAddOns.reduce((sum, item) => sum + (item.purchasePriceEur ?? 0), 0);
   const rentalDays = daysBetween(startDate, endDate);
   const rentalTent = rentalTents.find((tent) => tent.id === tentId) ?? rentalTents[0];
+  const pendingDate = es ? "por confirmar" : "to confirm";
+  const rentalDateSummary = startDate && endDate
+    ? `${startDate} → ${endDate}`
+    : startDate
+      ? `${startDate} → ${pendingDate}`
+      : endDate
+        ? `${pendingDate} → ${endDate}`
+        : pendingDate;
 
   const requestText = mode === "build"
     ? es
       ? `Hola TopTent Pro, quiero configurar un equipo de viaje. Base: ${buildBase.name.es} (${money(buildBase.priceEur, locale)}). Extras seleccionados: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.es).join(", ") : "ninguno todavía"}. ¿Podéis confirmarme compatibilidad y precio final?`
       : `Hi TopTent Pro, I want to build a travel setup. Base: ${buildBase.name.en} (${money(buildBase.priceEur, locale)}). Selected add-ons: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.en).join(", ") : "none yet"}. Can you confirm compatibility and the final price?`
     : es
-      ? `Hola TopTent Pro, quiero solicitar un alquiler. Tienda preferida: ${rentalTent.name.es}. Fechas: ${startDate || "por confirmar"} a ${endDate || "por confirmar"}. Extras: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.es).join(", ") : "ninguno todavía"}. ¿Podéis confirmar disponibilidad y precio?`
-      : `Hi TopTent Pro, I want to request a rental. Preferred tent: ${rentalTent.name.en}. Dates: ${startDate || "to confirm"} to ${endDate || "to confirm"}. Add-ons: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.en).join(", ") : "none yet"}. Can you confirm availability and pricing?`;
+      ? `Hola TopTent Pro, quiero solicitar un alquiler. Tienda preferida: ${rentalTent.name.es}. Fechas: ${rentalDateSummary}. Extras: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.es).join(", ") : "ninguno todavía"}. ¿Podéis confirmar disponibilidad y precio?`
+      : `Hi TopTent Pro, I want to request a rental. Preferred tent: ${rentalTent.name.en}. Dates: ${rentalDateSummary}. Add-ons: ${selectedAddOns.length ? selectedAddOns.map((item) => item.name.en).join(", ") : "none yet"}. Can you confirm availability and pricing?`;
 
   const contactHref = `${pathForLocale("/contact", locale)}?message=${encodeURIComponent(requestText)}`;
 
@@ -104,7 +112,7 @@ export function SetupConfigurator({ mode, locale }: { mode: "build" | "rental"; 
             {quotedPurchaseAddOns.length > 0 && <p className="mt-2 text-xs leading-5 text-white/45">+ {quotedPurchaseAddOns.length} {es ? "extra(s) con precio por confirmar" : "add-on(s) awaiting confirmed pricing"}</p>}
           </div>
         </> : <>
-          <div className="mt-5 border-b border-white/10 pb-5"><p className="font-black">{rentalTent.name[locale]}</p><p className="mt-2 text-sm text-white/55">{startDate && endDate ? `${startDate} → ${endDate}` : (es ? "Fechas por elegir" : "Dates to choose")}</p></div>
+          <div className="mt-5 border-b border-white/10 pb-5"><p className="font-black">{rentalTent.name[locale]}</p><p className="mt-2 text-sm text-white/55">{startDate || endDate ? rentalDateSummary : (es ? "Fechas por elegir" : "Dates to choose")}</p></div>
           <div className="py-5">{selectedAddOns.length ? <div className="grid gap-3">{selectedAddOns.map((item) => <div key={item.id} className="flex justify-between gap-4 text-sm"><span>{item.name[locale]}</span><span className="font-bold">{item.rentalDailyPriceEur === null ? (es ? "Por cotizar" : "Quote") : `${money(item.rentalDailyPriceEur, locale)}/${es ? "día" : "day"}`}</span></div>)}</div> : <p className="text-sm text-white/55">{es ? "Selecciona los extras que quieres llevar." : "Choose the extras you want to take."}</p>}</div>
           <div className="border-t border-white/10 pt-5"><p className="text-sm leading-6 text-white/55">{es ? "Confirmaremos disponibilidad, compatibilidad del vehículo, condiciones y precio antes de cerrar el alquiler." : "We’ll confirm availability, vehicle compatibility, terms and pricing before the rental is final."}</p></div>
         </>}
