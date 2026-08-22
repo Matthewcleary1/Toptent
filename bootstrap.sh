@@ -17,6 +17,40 @@ if [ -d .i18n ]; then
   tar -xJf /tmp/tenttop-i18n-remainder.tar.xz -C .
 fi
 
+# Canonical business brand is TopTent Pro. The migrated Wix source used the
+# older Tenttop/TENTTOP label in UI copy and metadata, so normalise every
+# generated customer-facing source file at build time without touching product
+# specification data or URLs.
+node <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const roots = ['app', 'components', 'lib', 'supabase', 'docs'];
+const textExtensions = new Set(['.ts', '.tsx', '.js', '.jsx', '.css', '.md', '.sql', '.json', '.txt']);
+
+function rewriteFile(file) {
+  const ext = path.extname(file);
+  if (!textExtensions.has(ext)) return;
+  const source = fs.readFileSync(file, 'utf8');
+  const updated = source
+    .replaceAll('TENTTOP', 'TOPTENT PRO')
+    .replaceAll('Tenttop', 'TopTent Pro');
+  if (updated !== source) fs.writeFileSync(file, updated);
+}
+
+function walk(target) {
+  if (!fs.existsSync(target)) return;
+  const stat = fs.statSync(target);
+  if (stat.isFile()) return rewriteFile(target);
+  for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '.git') continue;
+    walk(path.join(target, entry.name));
+  }
+}
+
+for (const root of roots) walk(root);
+NODE
+
 # The Supabase Edge Function targets Deno and is deployed separately by Supabase.
 # Keep it outside Next.js/Node TypeScript checking during the Vercel build.
 node <<'NODE'
