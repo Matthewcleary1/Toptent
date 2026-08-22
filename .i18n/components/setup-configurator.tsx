@@ -23,7 +23,7 @@ function daysBetween(start: string, end: string) {
 export function SetupConfigurator({ mode, locale }: { mode: "build" | "rental"; locale: Locale }) {
   const es = locale === "es";
   const [selected, setSelected] = useState<string[]>([]);
-  const [tentId, setTentId] = useState(rentalTents[0].id);
+  const [tentId, setTentId] = useState<string>(rentalTents[0].id);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
